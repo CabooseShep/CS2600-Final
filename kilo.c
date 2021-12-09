@@ -3,15 +3,23 @@
    using code provided by https://viewsourcecode.org/snaptoken/kilo/
 */
 
+/*** terminal ***/
+
+
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
 
+/*** data ***/
+
 struct termios orig_termios;
 
-void die(const char*s)
+/*** terminal ***/
+
+void die(const char *s)
 {
     perror(s);
     exit(1);
@@ -19,19 +27,18 @@ void die(const char*s)
 
 void disableRawMode()
 {
-   if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
-   {
-       die("tcsetattr");
-   }
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios) == -1)
+    {
+        die("tcsetattr");
+    }
 }
 
 void enableRawMode()
 {
-
-   if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
-   {
-       die("tcgetattr");
-   }
+    if (tcgetattr(STDIN_FILENO, &orig_termios) == -1)
+    {
+        die("tcgetattr");
+    }
 
     atexit(disableRawMode);
 
@@ -47,20 +54,23 @@ void enableRawMode()
     {
         die("tcsetattr");
     }
+
 }
+
+/*** init ***/
 
 int main()
 {
     enableRawMode();
 
-    while (1)
+    while(1)
     {
         char c = '\0';
         if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN)
         {
             die("read");
         }
-        
+
         if (iscntrl(c))
         {
             printf("%d\r\n", c);
@@ -68,9 +78,13 @@ int main()
 
         else
         {
-            printf("%d('%c')\r\n", c, c);
+            printf("%d ('%c')\r\n", c, c);
         }
-        if (c == 'q') break;
+
+        if (c == 'q')
+        {
+            break;
+        }
     }
     return 0;
 }
